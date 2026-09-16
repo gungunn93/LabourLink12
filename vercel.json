@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm --prefix frontend install && npm --prefix frontend run build",
+  "buildCommand": "cd frontend && npm install --foreground-scripts && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": null,
   "rewrites": [
