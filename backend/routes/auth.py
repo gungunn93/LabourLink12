@@ -160,11 +160,10 @@ def reset_password():
 def setup_admin():
     """
     One-time endpoint to create the admin account.
-    Protected by a setup key from environment variable ADMIN_SETUP_KEY.
-    After creating admin, remove or ignore this endpoint — it checks the key every time.
+    Protected by ADMIN_SETUP_KEY environment variable.
     """
     import os
-    setup_key = os.getenv("ADMIN_SETUP_KEY", "")
+    setup_key = os.getenv("ADMIN_SETUP_KEY", "").strip()
     if not setup_key:
         return err("Admin setup is not enabled. Set ADMIN_SETUP_KEY in environment variables.", 403)
 
@@ -194,3 +193,35 @@ def setup_admin():
     db.session.commit()
     token = create_access_token(identity=str(admin.id), additional_claims={"role": "admin"})
     return ok({"email": email, "token": token}, "Admin account created successfully")
+
+
+@auth_bp.get("/setup-admin/<string:key>")
+def setup_admin_get(key):
+    """
+    Simple GET version — just open this URL in browser:
+    /api/auth/setup-admin/YOUR_ADMIN_SETUP_KEY
+    """
+    import os
+    setup_key = os.getenv("ADMIN_SETUP_KEY", "").strip()
+    if not setup_key:
+        return err("Admin setup is not enabled. Set ADMIN_SETUP_KEY in environment variables.", 403)
+    if key.strip() != setup_key:
+        return err("Invalid setup key", 403)
+
+    email = "admin@labourlink.com"
+    password = "Admin@1234"
+    name = "Admin"
+
+    existing = User.query.filter_by(email=email).first()
+    if existing:
+        if existing.role == "admin":
+            return ok({"email": existing.email, "password": "Admin@1234"}, "Admin already exists — login with Admin@1234")
+        existing.role = "admin"
+        db.session.commit()
+        return ok({"email": existing.email}, "User promoted to admin")
+
+    admin = User(name=name, email=email, role="admin")
+    admin.set_password(password)
+    db.session.add(admin)
+    db.session.commit()
+    return ok({"email": email, "password": password}, "Admin created! Login with admin@labourlink.com / Admin@1234")
