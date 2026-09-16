@@ -8,15 +8,15 @@ db = SQLAlchemy()
 jwt = JWTManager()
 cors = CORS()
 
-# Use gevent in production (Render), threading for local dev
+# Use eventlet in production (Render), threading for local dev
 # Override with SOCKETIO_ASYNC_MODE env var if needed
 def _detect_async_mode():
     explicit = os.getenv("SOCKETIO_ASYNC_MODE")
     if explicit:
         return explicit
     try:
-        import gevent  # noqa: F401
-        return "gevent"
+        import eventlet  # noqa: F401
+        return "eventlet"
     except ImportError:
         return "threading"
 

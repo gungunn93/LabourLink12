@@ -17,14 +17,12 @@ cryptography==44.0.3
 Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.36
 psycopg2-binary==2.9.10
-greenlet==3.1.1
 
 # ── Real-time / WebSockets ───────────────────────────────────────────────────
 Flask-SocketIO==5.5.1
 python-socketio==5.12.1
 python-engineio==4.11.2
-gevent==24.11.1
-gevent-websocket==0.10.1
+eventlet==0.37.0
 simple-websocket==1.1.0
 
 # ── CORS ─────────────────────────────────────────────────────────────────────
