@@ -1,0 +1,64 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+*.env
+!.env.example          # keep example files in git
+
+# ── Databases ─────────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+backend/instance/
+
+# ── File uploads (user content, not source) ───────────────────────────────────
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+.npm/
+
+# ── OS / editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# ── Credentials / keys ────────────────────────────────────────────────────────
+credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+.credentials
+service-account*.json
+
+# ── Platform / CI artefacts (not needed in production repo) ───────────────────
+.emergent/
+test_reports/
+memory/
+
+# ── Extra uploaded user images (binary blobs, not source) ─────────────────────
+backend/uploads/*.jpeg
+backend/uploads/*.jpg
+backend/uploads/*.png
+backend/uploads/*.gif
+!backend/uploads/.gitkeep

@@ -1,0 +1,104 @@
+# ============================================================================
+# LabourLink – Render Blueprint
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Services defined here:
+#   1. labourlink-api   – Flask + Socket.IO backend (Web Service)
+#   2. labourlink-web   – React/Vite frontend      (Static Site)
+#   3. labourlink-db    – PostgreSQL database       (Database)
+#
+# HOW TO USE
+# ----------
+# 1. Push this repository to GitHub.
+# 2. In the Render dashboard → New → Blueprint → point to your repo.
+# 3. Render will create all three services automatically.
+# 4. After first deploy, go to labourlink-api → Environment and fill in:
+#      SECRET_KEY, JWT_SECRET_KEY, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+#    (DATABASE_URL and CORS_ORIGINS are set automatically by the blueprint.)
+# ============================================================================
+
+databases:
+  - name: labourlink-db
+    databaseName: labourlink
+    user: labourlink
+    plan: free          # upgrade to starter/standard for production workloads
+    region: singapore   # change to the region closest to your users
+
+services:
+  # ── Backend: Flask API + Socket.IO ────────────────────────────────────────
+  - type: web
+    name: labourlink-api
+    runtime: python
+    region: singapore
+    plan: free          # upgrade to starter for always-on + more RAM
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker --workers 1 --bind 0.0.0.0:$PORT --timeout 120 wsgi:application
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: labourlink-db
+          property: connectionString
+      - key: CORS_ORIGINS
+        # Set this to your frontend URL after first deploy, e.g.:
+        # https://labourlink-web.onrender.com
+        value: https://labourlink-web.onrender.com
+      - key: SECRET_KEY
+        generateValue: true   # Render auto-generates a secure random value
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_EXPIRES_DAYS
+        value: "7"
+      - key: UPLOAD_FOLDER
+        value: uploads
+      - key: PLATFORM_FEE_PERCENT
+        value: "5"
+      - key: PAYMENT_GATEWAY
+        value: razorpay
+      - key: RAZORPAY_KEY_ID
+        sync: false   # fill in manually in the Render dashboard
+      - key: RAZORPAY_KEY_SECRET
+        sync: false   # fill in manually in the Render dashboard
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+  # ── Frontend: React/Vite static site ──────────────────────────────────────
+  - type: web
+    name: labourlink-web
+    runtime: static
+    region: singapore
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    # SPA routing: all paths → index.html (also handled by public/_redirects)
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      # Security headers
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      # Long-cache for hashed assets
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    envVars:
+      - key: VITE_API_URL
+        # Must point to the backend service URL + /api
+        value: https://labourlink-api.onrender.com/api
+      - key: VITE_SOCKET_URL
+        value: https://labourlink-api.onrender.com
+      - key: VITE_RAZORPAY_KEY_ID
+        sync: false   # fill in manually (publishable key, safe in frontend)

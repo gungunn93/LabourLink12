@@ -1,0 +1,32 @@
+{
+  "app_name": "LabourLink",
+  "context": "hybrid_fullstack",
+  "design_archetype": "ORGANIC & EARTHY / PERFORMANCE PRO FUSION",
+  "typography": {
+    "heading_font": "Plus Jakarta Sans, sans-serif",
+    "body_font": "Inter, sans-serif",
+    "mono_font": "JetBrains Mono, monospace"
+  },
+  "colors": {
+    "primary": "#0F172A",
+    "secondary": "#334155",
+    "accent": "#059669",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "border": "#E2E8F0",
+    "text_primary": "#0F172A",
+    "text_secondary": "#64748B"
+  },
+  "component_path": "frontend/src/components",
+  "image_urls": {
+    "hero_worker": "https://images.unsplash.com/photo-1587582423116-ec07293f0395?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBtYXJrZXRwbGFjZSUyMHdvcmtlcnMlMjBjb25zdHJ1Y3Rpb24lMjBwcm9mZXNzaW9uYWx8ZW58MHx8fHwxNzg4MTcyNDY1fDA&ixlib=rb-4.1.0&q=85",
+    "team_workers": "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBtYXJrZXRwbGFjZSUyMHdvcmtlcnMlMjBjb25zdHJ1Y3Rpb24lMjBwcm9mZXNzaW9uYWx8ZW58MHx8fHwxNzg4MTcyNDY1fDA&ixlib=rb-4.1.0&q=85",
+    "construction_tool": "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBtYXJrZXRwbGFjZSUyMHdvcmtlcnMlMjBjb25zdHJ1Y3Rpb24lMjBwcm9mZXNzaW9uYWx8ZW58MHx8fHwxNzg4MTcyNDY1fDA&ixlib=rb-4.1.0&q=85"
+  },
+  "universal_guidelines_for_main_agent": [
+    "Ensure all interactive and key informational elements include a data-testid attribute.",
+    "Do not use complete transparent background in headers, overlays, or surfaces with content underneath.",
+    "Maintain high contrast ratios and clear focus states.",
+    "Ensure responsive design with generous padding and clean grid layouts."
+  ]
+}
