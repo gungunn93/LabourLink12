@@ -84,6 +84,11 @@ def messages(cid):
     if not _allowed(conversation, user):
         return err("Access denied", 403)
     items = Message.query.filter_by(conversation_id=cid).order_by(Message.created_at).all()
+    # Mark messages sent by the other person as read
+    Message.query.filter_by(conversation_id=cid, is_read=False).filter(
+        Message.sender_id != user.id
+    ).update({"is_read": True})
+    db.session.commit()
     return ok(
         [
             {

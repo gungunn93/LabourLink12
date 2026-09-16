@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Badge, Empty, ErrorBox, Loading } from "../components/States";
 import { useToast } from "../context/ToastContext";
 import ProfileModal from "../components/ProfileModal";
+import StatusTimeline from "../components/StatusTimeline";
 
 export default function Applications() {
   const { user } = useAuth();
@@ -63,6 +64,7 @@ export default function Applications() {
           return (
             <div className={cardCls} key={a.id} data-testid={`application-card-${a.id}`}>
               <Badge>{a.status}</Badge>
+              <StatusTimeline status={a.status} />
               <h3>{a.job?.title}</h3>
               {a.worker && (
                 <p>Worker: <button className="link-btn" data-testid={`worker-name-${a.worker.id}`} onClick={() => openWorker(a.worker.id)}>{a.worker.name}</button> · {a.worker.phone}</p>

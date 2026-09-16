@@ -77,3 +77,25 @@ def list_ratings(uid):
             }
         )
     return ok(result)
+
+
+@ratings_bp.get("/ratings")
+@jwt_required()
+def list_ratings():
+    """Get ratings for a specific job — used by frontend to check if already rated."""
+    job_id = request.args.get("job_id", type=int)
+    if not job_id:
+        return err("job_id is required")
+    user = current_user()
+    ratings = RatingReview.query.filter_by(job_id=job_id).all()
+    return ok([
+        {
+            "id": r.id,
+            "reviewer_id": r.reviewer_id,
+            "reviewee_id": r.reviewee_id,
+            "rating": r.rating,
+            "comment": r.comment,
+            "date": safe_iso(r.created_at),
+        }
+        for r in ratings
+    ])

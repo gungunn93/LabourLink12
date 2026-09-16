@@ -16,6 +16,8 @@ def gateway_mode():
     configured = (current_app.config.get("PAYMENT_GATEWAY") or "razorpay").lower()
     if configured == "razorpay" and key and secret:
         return "razorpay"
+    if configured == "cashfree" and current_app.config.get("CASHFREE_APP_ID") and current_app.config.get("CASHFREE_SECRET_KEY"):
+        return "cashfree"
     return "unconfigured"
 
 

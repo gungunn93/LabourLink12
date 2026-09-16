@@ -16,10 +16,22 @@ export default function JobDetails() {
   const [err, setErr] = useState("");
   const [extra, setExtra] = useState({ amount: "", reason: "" });
   const [review, setReview] = useState({ rating: 5, comment: "" });
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const [workerId, setWorkerId] = useState(null);
   const [modal, setModal] = useState({ open: false, role: "employer", userId: null });
 
-  const load = () => api.get("/jobs/" + id).then((r) => setD(r.data.data)).catch((e) => setErr(messageOf(e, "Job not found")));
+  const load = () => api.get("/jobs/" + id).then((r) => {
+    const data = r.data.data;
+    setD(data);
+    // Auto-show rating prompt if job just completed and user hasn't rated yet
+    if (data?.job?.status === "Completed") {
+      api.get("/ratings?job_id=" + id).then((rr) => {
+        const ratings = rr.data.data || [];
+        const alreadyRated = ratings.some((r) => r.reviewer_id === user?.id);
+        if (!alreadyRated) setShowRatingModal(true);
+      }).catch(() => {});
+    }
+  }).catch((e) => setErr(messageOf(e, "Job not found")));
   useEffect(() => { load(); }, [id]);
   useEffect(() => {
     if (user?.role !== "employer") return;
@@ -51,6 +63,7 @@ export default function JobDetails() {
         comment: review.comment,
       });
       toast.success("Review submitted");
+      setShowRatingModal(false);
     } catch (e) { setErr(messageOf(e)); }
   };
 
@@ -104,6 +117,48 @@ export default function JobDetails() {
         </div>
       )}
       <ProfileModal open={modal.open} role={modal.role} userId={modal.userId} onClose={() => setModal({ ...modal, open: false })} />
+
+      {/* Rating prompt modal — auto-shows when job is completed */}
+      {showRatingModal && user && (
+        <div className="modal-overlay" role="dialog" aria-modal="true">
+          <div className="modal-panel">
+            <div className="modal-head">
+              <h3>⭐ Rate this job</h3>
+              <button className="btn ghost" onClick={() => setShowRatingModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ marginBottom: 16, color: "var(--muted)" }}>
+                {user.role === "worker"
+                  ? "How was working with this employer?"
+                  : "How was this worker's performance?"}
+              </p>
+              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setReview({ ...review, rating: n })}
+                    style={{
+                      fontSize: 28, background: "none", border: "none", cursor: "pointer",
+                      color: n <= review.rating ? "#f2b41a" : "#d0d6d5",
+                    }}
+                    aria-label={`${n} star`}
+                  >★</button>
+                ))}
+              </div>
+              <textarea
+                placeholder="Write a comment (optional)"
+                value={review.comment}
+                onChange={(e) => setReview({ ...review, comment: e.target.value })}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1px solid var(--line)", minHeight: 80 }}
+              />
+            </div>
+            <div className="modal-foot" style={{ gap: 10, display: "flex", justifyContent: "flex-end" }}>
+              <button className="btn ghost" onClick={() => setShowRatingModal(false)}>Skip</button>
+              <button className="btn primary" onClick={rate}>Submit rating</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

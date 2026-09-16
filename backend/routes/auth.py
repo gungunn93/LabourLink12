@@ -100,3 +100,59 @@ def me():
     return ok(user_json(user))
 
 
+
+
+import secrets
+from datetime import datetime, timedelta
+
+# In-memory token store (works for single-worker deployments)
+# For multi-worker production, move this to DB or Redis
+_reset_tokens = {}  # token -> {user_id, expires_at}
+
+
+@auth_bp.post("/forgot-password")
+def forgot_password():
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email") or "").strip().lower()
+    if not email:
+        return err("Email is required")
+    user = User.query.filter_by(email=email).first()
+    # Always return success — never reveal whether email exists (security)
+    if not user:
+        return ok({}, "If that email is registered, a reset link has been sent.")
+    token = secrets.token_urlsafe(32)
+    _reset_tokens[token] = {
+        "user_id": user.id,
+        "expires_at": datetime.utcnow() + timedelta(hours=1),
+    }
+    # In production: send this token via email (e.g. SendGrid, SMTP)
+    # For now: return the token in response so it can be used directly
+    # (Remove the token from response once email is configured)
+    import os
+    if os.getenv("APP_ENV") == "development":
+        return ok({"reset_token": token, "note": "Dev mode: use this token directly"}, "Reset token generated")
+    return ok({}, "If that email is registered, a reset link has been sent.")
+
+
+@auth_bp.post("/reset-password")
+def reset_password():
+    data = request.get_json(silent=True) or {}
+    token = str(data.get("token") or "").strip()
+    new_password = str(data.get("password") or "")
+    if not token or not new_password:
+        return err("Token and new password are required")
+    if len(new_password) < 8:
+        return err("Password must be at least 8 characters")
+    entry = _reset_tokens.get(token)
+    if not entry:
+        return err("Invalid or expired reset token", 400)
+    if datetime.utcnow() > entry["expires_at"]:
+        del _reset_tokens[token]
+        return err("Reset token has expired. Please request a new one.", 400)
+    user = db.session.get(User, entry["user_id"])
+    if not user:
+        return err("User not found", 404)
+    user.set_password(new_password)
+    db.session.commit()
+    del _reset_tokens[token]
+    return ok({}, "Password reset successfully. You can now log in.")

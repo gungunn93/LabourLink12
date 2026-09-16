@@ -52,6 +52,10 @@ class Config:
     PAYMENT_GATEWAY = os.getenv("PAYMENT_GATEWAY", "razorpay")
     RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
     RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+    # Cashfree (free alternative to Razorpay — signup at cashfree.com)
+    CASHFREE_APP_ID = os.getenv("CASHFREE_APP_ID", "")
+    CASHFREE_SECRET_KEY = os.getenv("CASHFREE_SECRET_KEY", "")
+    CASHFREE_ENV = os.getenv("CASHFREE_ENV", "sandbox")
 
     # ── Maps ─────────────────────────────────────────────────────────────────
     MAP_TILE_URL = os.getenv("MAP_CONFIG", "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")

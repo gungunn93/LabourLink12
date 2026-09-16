@@ -219,3 +219,37 @@ def delete_job(jid):
     job.status = "Disabled"
     db.session.commit()
     return ok({}, "Job disabled")
+
+
+# ── Saved Jobs ────────────────────────────────────────────────────────────────
+from models import SavedJob  # noqa: E402 (already imported above via models)
+
+
+@jobs_bp.get("/jobs/saved")
+@jwt_required()
+def saved_jobs():
+    user = current_user()
+    saves = SavedJob.query.filter_by(user_id=user.id).order_by(SavedJob.created_at.desc()).all()
+    result = []
+    for s in saves:
+        job = db.session.get(Job, s.job_id)
+        if job:
+            result.append(job_json(job, user))
+    return ok(result)
+
+
+@jobs_bp.post("/jobs/<int:jid>/save")
+@jwt_required()
+def save_job(jid):
+    user = current_user()
+    job = db.session.get(Job, jid)
+    if not job:
+        return err("Job not found", 404)
+    existing = SavedJob.query.filter_by(user_id=user.id, job_id=jid).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return ok({"saved": False}, "Job removed from saved")
+    db.session.add(SavedJob(user_id=user.id, job_id=jid))
+    db.session.commit()
+    return ok({"saved": True}, "Job saved")
