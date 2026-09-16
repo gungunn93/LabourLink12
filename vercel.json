@@ -1,7 +1,4 @@
 {
-  "buildCommand": "cd frontend && npm install --foreground-scripts && npm run build",
-  "outputDirectory": "frontend/dist",
-  "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
