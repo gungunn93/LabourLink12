@@ -154,3 +154,43 @@ def reset_password():
     db.session.commit()
     del _reset_tokens[token]
     return ok({}, "Password reset successfully. You can now log in.")
+
+
+@auth_bp.post("/setup-admin")
+def setup_admin():
+    """
+    One-time endpoint to create the admin account.
+    Protected by a setup key from environment variable ADMIN_SETUP_KEY.
+    After creating admin, remove or ignore this endpoint — it checks the key every time.
+    """
+    import os
+    setup_key = os.getenv("ADMIN_SETUP_KEY", "")
+    if not setup_key:
+        return err("Admin setup is not enabled. Set ADMIN_SETUP_KEY in environment variables.", 403)
+
+    data = request.get_json(silent=True) or {}
+    provided_key = str(data.get("setup_key") or "").strip()
+    if provided_key != setup_key:
+        return err("Invalid setup key", 403)
+
+    email = str(data.get("email") or "admin@labourlink.com").strip().lower()
+    password = str(data.get("password") or "Admin@1234")
+    name = str(data.get("name") or "Admin")
+
+    if len(password) < 8:
+        return err("Password must be at least 8 characters")
+
+    existing = User.query.filter_by(email=email).first()
+    if existing:
+        if existing.role == "admin":
+            return ok({"email": existing.email}, "Admin already exists")
+        existing.role = "admin"
+        db.session.commit()
+        return ok({"email": existing.email}, "User promoted to admin")
+
+    admin = User(name=name, email=email, role="admin")
+    admin.set_password(password)
+    db.session.add(admin)
+    db.session.commit()
+    token = create_access_token(identity=str(admin.id), additional_claims={"role": "admin"})
+    return ok({"email": email, "token": token}, "Admin account created successfully")
