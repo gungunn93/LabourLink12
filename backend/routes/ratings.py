@@ -81,7 +81,7 @@ def list_ratings(uid):
 
 @ratings_bp.get("/ratings")
 @jwt_required()
-def list_ratings():
+def ratings_by_job():
     """Get ratings for a specific job — used by frontend to check if already rated."""
     job_id = request.args.get("job_id", type=int)
     if not job_id:

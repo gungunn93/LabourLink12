@@ -1,5 +1,7 @@
 from flask import Blueprint, request
 from flask_jwt_extended import create_access_token, jwt_required
+import secrets
+from datetime import datetime, timedelta
 
 from extensions import db
 from models import User, WorkerProfile, EmployerProfile, Wallet
@@ -102,11 +104,7 @@ def me():
 
 
 
-import secrets
-from datetime import datetime, timedelta
-
 # In-memory token store (works for single-worker deployments)
-# For multi-worker production, move this to DB or Redis
 _reset_tokens = {}  # token -> {user_id, expires_at}
 
 

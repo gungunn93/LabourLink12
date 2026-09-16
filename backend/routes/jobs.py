@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 from extensions import db
-from models import Job, JobCategory, Application, EmployerProfile, User, WorkerAvailability, WorkerProfile
+from models import Job, JobCategory, Application, EmployerProfile, User, WorkerAvailability, WorkerProfile, SavedJob
 from services.algorithms import match_score, haversine
 from services.notifications import notify
 from utils.responses import ok, err
@@ -222,8 +222,6 @@ def delete_job(jid):
 
 
 # ── Saved Jobs ────────────────────────────────────────────────────────────────
-from models import SavedJob  # noqa: E402 (already imported above via models)
-
 
 @jobs_bp.get("/jobs/saved")
 @jwt_required()
